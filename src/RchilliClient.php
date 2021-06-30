@@ -11,17 +11,20 @@ class RchilliClient
 
     protected $userKey;
     protected $subUserId;
+    protected $withoutTemplateOutput;
 
     /**
      * Create an instance of RchilliClient
-     * @param mixed $userKey    Your user keyu
-     * @param mixed $subUserId  Your sub user id
+     * @param string $userKey    Your user keyu
+     * @param string $subUserId  Your sub user id
+     * @param boolean $withoutTemplateOutput  If set to true the response will not contain the template output (default true)
      * @return void 
      */
-    public function __construct($userKey, $subUserId)
+    public function __construct($userKey, $subUserId, $withoutTemplateOutput = true)
     {
         $this->userKey = $userKey;
         $this->subUserId = $subUserId;
+        $this->withoutTemplateOutput = $withoutTemplateOutput;
     }
 
     /**
@@ -61,6 +64,12 @@ class RchilliClient
             'json' => $payload,
         ]);
 
-        return json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);
+
+        if ($this->withoutTemplateOutput && is_array($result)) {
+            unset($result['ResumeParserData']['TemplateOutput']);
+        }
+
+        return $result;
     }
 }
